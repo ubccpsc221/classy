@@ -44,12 +44,22 @@ export class Factory {
     }
 
     public getView(backendUrl: string): IView {
+        // FORK: You _will_ need to add a new block here for your course to point to your student view.
+        // NOTE: this will be improved in the future.
         if (this.studentView === null) {
             Log.trace("Factory::getView() - instantating new view for: " + this.name);
             if (this.name === 'classytest') {
-                this.studentView = new CS310View(backendUrl); // default to 310 for testing
-                // } else if (this.name === 'cs310') {
-                //     this.studentView = new CS310View(backendUrl);
+                this.studentView = new CS310View(backendUrl); // default to 310 for unit testing
+            } else if (this.name === 'classy') {
+                this.studentView = new CS310View(backendUrl); // default to 310 for deploy testing
+            } else if (this.name === 'cs310') {
+                this.studentView = new CS310View(backendUrl);
+            } else if (this.name === 'sdmm') {
+                this.studentView = new SDMMSummaryView(backendUrl);
+            } else if (this.name === 'CS310-2017Jan' || this.name === 'CS310-2017Jan_TEST') {
+                this.studentView = new CS310View(backendUrl);
+            } else if (this.name === 'cs340' || this.name === 'cpsc340') {
+                this.studentView = new CS340View(backendUrl);
             } else if (this.name === 'cs221') {
                 this.studentView = new CS221View(backendUrl);
                 // } else if (this.name === 'sdmm') {
@@ -66,6 +76,8 @@ export class Factory {
     }
 
     public getAdminView(backendUrl: string): IView {
+        // FORK: You probably do not need to modify this unless you have created
+        // a custom admin view.
         if (this.adminView === null) {
             Log.trace("Factory::getAdminView() - instantating new view for: " + this.name);
             const tabs = {
@@ -87,21 +99,16 @@ export class Factory {
                 // tabs.dashboard = false;
                 // tabs.config = false;
                 this.adminView = new AdminView(backendUrl, tabs); // default admin
-            } else if (this.name === 'cs221') {
+            } else if (this.name === 'cs310') {
+                this.adminView = new CS310AdminView(backendUrl, tabs);
+            } else if (this.name === 'cs340' || this.name === 'cpsc340') {
+                tabs.teams = false; // no teams
+                tabs.results = false; // no results
+                tabs.dashboard = false; // no dashboard
+                this.adminView = new CS340AdminView(backendUrl, tabs);
+           } else {
+                Log.info("Factory::getAdminView() - returning default admin view for: " + this.name);
                 this.adminView = new AdminView(backendUrl, tabs); // default admin
-
-                // } else if (this.name === 'cs310') {
-                //     this.adminView = new AdminView(backendUrl, tabs); // default admin
-                // this.adminView = new CS310AdminView(backendUrl, tabs);
-                // } else if (this.name === 'sdmm') {
-                //     this.adminView = new AdminView(backendUrl, tabs); // default admin
-                // } else if (this.name === 'cs340' || this.name === 'cpsc340') {
-                //     tabs.teams = false; // no teams
-                //     tabs.results = false; // no results
-                //     tabs.dashboard = false; // no dashboard
-                //     this.adminView = new CS340AdminView(backendUrl, tabs);
-            } else {
-                Log.error("Factory::getAdminView() - ERROR; unknown name: " + this.name);
             }
         }
         return this.adminView;
@@ -134,19 +141,13 @@ export class Factory {
      * @returns {string}
      */
     public getHTMLPrefix() {
+        // FORK: You probably do not need to change this unless you want your course
+        // name to be different than the directory your htmnl files are stored in.
         Log.trace("Factory::getHTMLPrefix() - getting prefix for: " + this.name);
         if (this.name === 'classytest') {
             return 'cs310'; // might need to change this per-course for testing
-        } else if (this.name === 'cs221') {
-            return 'cs221';
-            // } else if (this.name === 'sdmm') {
-            //     return 'sdmm';
-            // } else if (this.name === 'cs310') {
-            //     return 'cs310';
-            // } else if (this.name === 'cs340' || this.name === 'cpsc340' || this.name.toLowerCase().startsWith('cpsc340')) {
-            //     return 'cs340';
         } else {
-            Log.error("Factory::getHTMLPrefix() - ERROR; unknown name: " + this.name);
+            return this.name;
         }
     }
 }

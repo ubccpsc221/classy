@@ -42,7 +42,7 @@ export class Factory {
             // } else if (name === 'cs340' || name === 'cpsc340') {
             //     // instantiate CS340REST in fork
         } else {
-            Log.error("Factory::getCustomRouteHandler() - unknown name: " + name);
+            Log.warn("Factory::getCustomRouteHandler() - no custom routes for: " + name);
         }
         return new NoCustomRoutes(); // default handler
     }
@@ -75,6 +75,10 @@ export class Factory {
         }
 
         if (name === 'classytest') {
+            // for unit testing
+            Factory.controller = new CourseController(ghController);
+        } else if (name === 'classy') {
+            // for test deploying
             Factory.controller = new CourseController(ghController);
             // } else if (name === 'sdmm' || name === 'secapstonetest') {
             // instantiate on fork
