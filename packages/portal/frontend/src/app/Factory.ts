@@ -2,6 +2,7 @@
 import Log from "../../../../common/Log";
 import {CS340AdminView} from "./views/340/CS340AdminView";
 import {AdminView} from "./views/AdminView";
+import {CS221View} from "./views/cs221/CS221View";
 import {CS310AdminView} from "./views/cs310/CS310AdminView";
 import {CS310View} from "./views/cs310/CS310View";
 
@@ -55,6 +56,8 @@ export class Factory {
                 this.studentView = new CS310View(backendUrl); // default to 310 for deploy testing
             } else if (this.name === 'cs310') {
                 this.studentView = new CS310View(backendUrl);
+            } else if (this.name === 'cs221') {
+                this.studentView = new CS221View(backendUrl);
                 // } else if (this.name === 'sdmm') {
                 //     this.studentView = new SDMMSummaryView(backendUrl);
                 // } else if (this.name === 'CS310-2017Jan' || this.name === 'CS310-2017Jan_TEST') {

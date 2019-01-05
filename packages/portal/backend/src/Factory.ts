@@ -3,6 +3,7 @@ import Log from "../../../common/Log";
 
 import {AdminController} from "./controllers/AdminController";
 import {CourseController, ICourseController} from "./controllers/CourseController";
+import {CS221Controller} from "./controllers/CS221Controller";
 import {GitHubActions} from "./controllers/GitHubActions";
 import {GitHubController, IGitHubController} from "./controllers/GitHubController";
 
@@ -83,9 +84,9 @@ export class Factory {
             //     // Factory.controller = new CS340Controller(ghController);
             // } else if (name === 'cs210' || name === 'cpsc210') {
             //     // instantiate 210 controller in fork
-            // } else if (name === 'cs221' || name === 'cpsc221') {
-            //     // instantiate 221 controller in fork
-            //     Factory.controller = new CS221Controller(ghController);
+            } else if (name === 'cs221' || name === 'cpsc221') {
+                // instantiate 221 controller in fork
+                Factory.controller = new CS221Controller(ghController);
         } else {
             Log.error("Factory::getCourseController() - unknown name: " + name);
             throw new Error("Unknown course name: " + name);
