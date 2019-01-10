@@ -413,6 +413,7 @@ describe("AdminController", () => {
             }
         });
 
+        // // broken when we switched to plan/perform provisioning
         it("Should provision repos if there are some to do and singles are disabled.", async () => {
             await clearAndPreparePartial();
 
@@ -424,7 +425,15 @@ describe("AdminController", () => {
             expect(allTeams[0].URL).to.be.null; // not provisioned yet
 
             const deliv = await dc.getDeliverable(Test.DELIVIDPROJ);
-            const res = await ac.provision(deliv, false);
+            const plan = await ac.planProvision(deliv, false);
+
+            const repos: Repository[] = [];
+            for (const repo of plan) {
+                repos.push(await rc.getRepository(repo.id));
+            }
+
+            const res = await ac.performProvision(repos, deliv.importURL);
+            // const res = await ac.provision(deliv, false);
             Log.test("provisioned: " + JSON.stringify(res));
             expect(res).to.be.an('array');
             expect(res.length).to.equal(1);
@@ -457,7 +466,12 @@ describe("AdminController", () => {
             expect(allTeams[0].custom.githubAttached).to.be.false;
 
             const deliv = await dc.getDeliverable(Test.DELIVIDPROJ);
-            let res = await ac.release(deliv);
+            const relPlan = await ac.planRelease(deliv);
+            Log.test("Release plan: " + JSON.stringify(relPlan));
+            expect(relPlan).to.be.an('array');
+            expect(relPlan.length).to.equal(1);
+
+            const res = await ac.performRelease(allRepos);
             Log.test("Released: " + JSON.stringify(res));
             expect(res).to.be.an('array');
             expect(res.length).to.equal(1);
@@ -466,11 +480,11 @@ describe("AdminController", () => {
             expect(allNewTeams.length).to.equal(1);
             expect(allNewTeams[0].custom.githubAttached).to.be.true;
 
-            // try again: should not release any more repos
-            res = await ac.release(deliv);
-            Log.test("Re-Released: " + JSON.stringify(res));
-            expect(res).to.be.an('array');
-            expect(res.length).to.equal(0);
+            // // try again: should not release any more repos
+            // res = await ac.release(allRepos);
+            // Log.test("Re-Released: " + JSON.stringify(res));
+            // expect(res).to.be.an('array');
+            // expect(res.length).to.equal(0);
         }).timeout(Test.TIMEOUTLONG);
 
         it("Should provision repos if singles are enabled.", async () => {
@@ -485,7 +499,14 @@ describe("AdminController", () => {
             expect(teamNum).to.be.lessThan(0); // should not be provisioned yet
 
             const deliv = await dc.getDeliverable(Test.DELIVID0);
-            const res = await ac.provision(deliv, true);
+            const plan = await ac.planProvision(deliv, true);
+
+            const repos: Repository[] = [];
+            for (const repo of plan) {
+                repos.push(await rc.getRepository(repo.id));
+            }
+            const res = await ac.performProvision(repos, deliv.importURL);
+
             Log.test("provisioned: " + JSON.stringify(res));
             expect(res).to.be.an('array');
             expect(res.length).to.equal(3);
@@ -523,7 +544,14 @@ describe("AdminController", () => {
             expect(allTeams.length).to.equal(4);
 
             const deliv = await dc.getDeliverable(Test.DELIVID0);
-            const res = await ac.provision(deliv, true);
+            const plan = await ac.planProvision(deliv, false);
+
+            const repos: Repository[] = [];
+            for (const repo of plan) {
+                repos.push(await rc.getRepository(repo.id));
+            }
+
+            const res = await ac.performProvision(repos, deliv.importURL);
             Log.test("Provisioned: " + JSON.stringify(res));
             expect(res).to.be.an('array');
             expect(res.length).to.equal(0);

@@ -13,7 +13,6 @@ import {
     DeliverableTransport,
     DeliverableTransportPayload,
     Payload,
-    ProvisionTransport,
     RepositoryPayload,
     StudentTransportPayload,
     TeamFormationTransport,
@@ -739,13 +738,26 @@ describe('Admin Routes', function() {
 
             let response = null;
             let body: Payload;
-            const url = '/portal/admin/provision';
+            let url = '/portal/admin/provision/' + Test.DELIVID0;
 
-            const provision: ProvisionTransport = {
-                delivId:    Test.DELIVID0,
-                formSingle: false
-            };
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            Log.test('planning the provisioning');
+            // first plan the url
+            response = await request(app).get(url).set({user: userName, token: userToken});
+            body = response.body;
+            Log.test('plan: ' + response.status + " -> " + JSON.stringify(body));
+            expect(response.status).to.equal(200);
+            expect(body.success).to.be.an('array');
+            expect(body.success.length).to.be.greaterThan(0);
+
+            // const provision: ProvisionTransport = {
+            //     delivId:    Test.DELIVID0,
+            //     formSingle: false
+            // };
+
+            Log.test('performing the provisioning');
+            url = '/portal/admin/provision/' + Test.DELIVID0 + '/' + Test.REPONAMEREAL;
+            // response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            response = await request(app).post(url).set({user: userName, token: userToken});
             body = response.body;
             Log.test('first provision: ' + response.status + " -> " + JSON.stringify(body));
             expect(response.status).to.equal(200);
@@ -753,13 +765,15 @@ describe('Admin Routes', function() {
             expect(body.success).to.be.an('array');
             expect(body.success.length).to.be.greaterThan(0);
 
-            // provision again; should not make anything new
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
-            body = response.body;
-            Log.test('second provision: ' + response.status + " -> " + JSON.stringify(body));
-            expect(response.status).to.equal(200);
-            expect(body.success).to.be.an('array');
-            expect(body.success.length).to.equal(0);
+            // Log.test('performing the provisioning a second time');
+            // // provision again; should not make anything new
+            // // response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            // response = await request(app).post(url).set({user: userName, token: userToken});
+            // body = response.body;
+            // Log.test('second provision: ' + response.status + " -> " + JSON.stringify(body));
+            // expect(response.status).to.equal(200);
+            // expect(body.success).to.be.an('array');
+            // expect(body.success.length).to.equal(0);
 
         }).timeout(Test.TIMEOUTLONG);
 
@@ -767,14 +781,14 @@ describe('Admin Routes', function() {
 
             let response = null;
             let body: Payload;
-            const url = '/portal/admin/provision';
+            let url = '/portal/admin/provision/' + Test.DELIVID0 + '/' + Test.REPONAMEREAL;
 
-            const provision: ProvisionTransport = {
-                delivId:    Test.DELIVID0,
-                formSingle: false
-            };
+            // const provision: ProvisionTransport = {
+            //     delivId:    Test.DELIVID0,
+            //     formSingle: false
+            // };
             // bad token
-            response = await request(app).post(url).send(provision).set({user: userName, token: Test.FAKETOKEN});
+            response = await request(app).post(url).set({user: userName, token: Test.FAKETOKEN});
             body = response.body;
             Log.test('bad token: ' + response.status + " -> " + JSON.stringify(body));
             expect(response.status).to.equal(401);
@@ -782,8 +796,8 @@ describe('Admin Routes', function() {
             expect(body.failure).to.not.be.undefined;
 
             // invalid deliverable
-            provision.delivId = 'FAKEDELIVERABLE';
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            url = '/portal/admin/provision/' + 'FAKEDELIVERABLE' + '/' + Test.REPONAMEREAL;
+            response = await request(app).post(url).set({user: userName, token: userToken});
             body = response.body;
             Log.test('invalid deliverable: ' + response.status + " -> " + JSON.stringify(body));
             expect(response.status).to.equal(400);
@@ -791,8 +805,8 @@ describe('Admin Routes', function() {
             expect(body.failure).to.not.be.undefined;
 
             // non-provisioning deliverable
-            provision.delivId = Test.DELIVID1;
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            url = '/portal/admin/provision/' + Test.DELIVID1 + '/' + Test.REPONAMEREAL;
+            response = await request(app).post(url).set({user: userName, token: userToken});
             body = response.body;
             Log.test('non-provisioning deliverable: ' + response.status + " -> " + JSON.stringify(body));
             expect(response.status).to.equal(400);
@@ -804,13 +818,13 @@ describe('Admin Routes', function() {
 
             let response = null;
             let body: Payload;
-            const url = '/portal/admin/release';
+            const url = '/portal/admin/release/' + Test.REPONAMEREAL;
 
-            const provision: ProvisionTransport = {
-                delivId:    Test.DELIVID0,
-                formSingle: false
-            };
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            // const provision: ProvisionTransport = {
+            //     delivId:    Test.DELIVID0,
+            //     formSingle: false
+            // };
+            response = await request(app).post(url).set({user: userName, token: userToken});
             body = response.body;
             Log.test('first release: ' + response.status + " -> " + JSON.stringify(body));
             expect(response.status).to.equal(200);
@@ -819,26 +833,21 @@ describe('Admin Routes', function() {
             expect(body.success.length).to.be.greaterThan(0);
 
             // release again; should not release anything new
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
-            body = response.body;
-            Log.test('second release: ' + response.status + " -> " + JSON.stringify(body));
-            expect(response.status).to.equal(200);
-            expect(body.success).to.be.an('array');
-            expect(body.success.length).to.equal(0);
+            // response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            // body = response.body;
+            // Log.test('second release: ' + response.status + " -> " + JSON.stringify(body));
+            // expect(response.status).to.equal(200);
+            // expect(body.success).to.be.an('array');
+            // expect(body.success.length).to.equal(0);
         }).timeout(Test.TIMEOUTLONG);
 
         it('Should fail to release a deliverable if invalid options are given', async function() {
 
             let response = null;
             let body: Payload;
-            const url = '/portal/admin/release';
+            const url = '/portal/admin/release/repoId';
 
-            const provision: ProvisionTransport = {
-                delivId:    Test.DELIVID0,
-                formSingle: false
-            };
-            // bad token
-            response = await request(app).post(url).send(provision).set({user: userName, token: Test.FAKETOKEN});
+            response = await request(app).post(url).set({user: userName, token: Test.FAKETOKEN});
             body = response.body;
             Log.test('bad token: ' + response.status + " -> " + JSON.stringify(body));
             expect(response.status).to.equal(401);
@@ -846,8 +855,7 @@ describe('Admin Routes', function() {
             expect(body.failure).to.not.be.undefined;
 
             // invalid deliverable
-            provision.delivId = 'FAKEDELIVERABLE';
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            response = await request(app).post(url).set({user: userName, token: userToken});
             body = response.body;
             Log.test('invalid deliverable: ' + response.status + " -> " + JSON.stringify(body));
             expect(response.status).to.equal(400);
@@ -855,13 +863,13 @@ describe('Admin Routes', function() {
             expect(body.failure).to.not.be.undefined;
 
             // non-provisioning deliverable
-            provision.delivId = Test.DELIVID1;
-            response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
-            body = response.body;
-            Log.test('non-provisioning deliverable: ' + response.status + " -> " + JSON.stringify(body));
-            expect(response.status).to.equal(400);
-            expect(body.success).to.be.undefined;
-            expect(body.failure).to.not.be.undefined;
+            // provision.delivId = Test.DELIVID1;
+            // response = await request(app).post(url).send(provision).set({user: userName, token: userToken});
+            // body = response.body;
+            // Log.test('non-provisioning deliverable: ' + response.status + " -> " + JSON.stringify(body));
+            // expect(response.status).to.equal(400);
+            // expect(body.success).to.be.undefined;
+            // expect(body.failure).to.not.be.undefined;
         });
     });
 
