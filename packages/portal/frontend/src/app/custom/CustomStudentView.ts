@@ -1,29 +1,26 @@
-/**
- * This is the main student page for CS310.
- *
- * Other courses should _not_ modify this but instead build their own
- * student views, as they need for their own courses.
- */
-
 import {OnsButtonElement} from "onsenui";
-import Log from "../../../../../../common/Log";
-import {Payload, TeamFormationTransport, TeamTransport} from "../../../../../../common/types/PortalTypes";
+import Log from "../../../../../common/Log";
+import {Payload, TeamFormationTransport, TeamTransport} from "../../../../../common/types/PortalTypes";
 
-import {UI} from "../../util/UI";
-import {StudentView} from "../StudentView";
+import {UI} from "../util/UI";
+import {AbstractStudentView} from "../views/AbstractStudentView";
 
-export class CS221View extends StudentView {
+/**
+ * This is the main student page for CS221.
+ *
+ */
+export class CustomStudentView extends AbstractStudentView {
 
     private teams: TeamTransport[];
 
     constructor(remoteUrl: string) {
         super();
-        Log.info("CS221View::<init>");
+        Log.info("CustomStudentView::<init>");
         this.remote = remoteUrl;
     }
 
     public renderPage(opts: {}) {
-        Log.info('CS221View::renderPage() - start; options: ' + opts);
+        Log.info('CustomStudentView::renderPage() - start; options: ' + opts);
         const that = this;
         const start = Date.now();
 
@@ -32,10 +29,10 @@ export class CS221View extends StudentView {
             // super render complete; do custom work
             return that.renderStudentPage();
         }).then(function() {
-            Log.info('CS221View::renderPage(..) - prep & render took: ' + UI.took(start));
+            Log.info('CustomStudentView::renderPage(..) - prep & render took: ' + UI.took(start));
             UI.hideModal();
         }).catch(function(err) {
-            Log.error('CS221View::renderPage() - ERROR: ' + err);
+            Log.error('CustomStudentView::renderPage() - ERROR: ' + err);
             UI.hideModal();
         });
     }
@@ -43,18 +40,18 @@ export class CS221View extends StudentView {
     private async renderStudentPage(): Promise<void> {
         UI.showModal('Fetching Data');
         try {
-            Log.info('CS221View::renderStudentPage(..) - start');
+            Log.info('CustomStudentView::renderStudentPage(..) - start');
 
-            // grades renedered in StudentView
+            // grades renedered in AbstractStudentView
 
-            // repos rendered in StudentView
+            // repos rendered in AbstractStudentView
 
             // teams rendered here
             const teams = await this.fetchTeamData();
             this.teams = teams;
             await this.renderTeams(teams);
 
-            Log.info('CS221View::renderStudentPage(..) - done');
+            Log.info('CustomStudentView::renderStudentPage(..) - done');
         } catch (err) {
             Log.error('Error encountered: ' + err.message);
         }
@@ -72,14 +69,14 @@ export class CS221View extends StudentView {
             this.teams = data;
             return data;
         } catch (err) {
-            Log.error('CS221View::fetchTeamData(..) - ERROR: ' + err.message);
+            Log.error('CustomStudentView::fetchTeamData(..) - ERROR: ' + err.message);
             this.teams = [];
             return [];
         }
     }
 
     private async renderTeams(teams: TeamTransport[]): Promise<void> {
-        Log.trace('CS221View::renderTeams(..) - start');
+        Log.trace('CustomStudentView::renderTeams(..) - start');
         const that = this;
 
         // make sure these are hidden
@@ -103,15 +100,15 @@ export class CS221View extends StudentView {
 
             const button = document.querySelector('#studentSelectPartnerButton') as OnsButtonElement;
             button.onclick = function(evt: any) {
-                Log.info('CS221View::renderTeams(..)::createTeam::onClick');
+                Log.info('CustomStudentView::renderTeams(..)::createTeam::onClick');
                 that.formTeam().then(function(team) {
-                    Log.info('CS221View::renderTeams(..)::createTeam::onClick::then - team created');
+                    Log.info('CustomStudentView::renderTeams(..)::createTeam::onClick::then - team created');
                     that.teams.push(team);
                     if (team !== null) {
                         that.renderPage({}); // simulating refresh
                     }
                 }).catch(function(err) {
-                    Log.info('CS221View::renderTeams(..)::createTeam::onClick::catch - ERROR: ' + err);
+                    Log.info('CustomStudentView::renderTeams(..)::createTeam::onClick::catch - ERROR: ' + err);
                 });
             };
 
@@ -128,7 +125,7 @@ export class CS221View extends StudentView {
     }
 
     private async formTeam(): Promise<TeamTransport> {
-        Log.info("CS221View::formTeam() - start");
+        Log.info("CustomStudentView::formTeam() - start");
         const otherId = UI.getTextFieldValue('studentSelectPartnerText');
         const myGithubId = this.getStudent().githubId;
         const payload: TeamFormationTransport = {
@@ -140,14 +137,14 @@ export class CS221View extends StudentView {
         options.method = 'post';
         options.body = JSON.stringify(payload);
 
-        Log.info("CS221View::formTeam() - URL: " + url + "; payload: " + JSON.stringify(payload));
+        Log.info("CustomStudentView::formTeam() - URL: " + url + "; payload: " + JSON.stringify(payload));
         const response = await fetch(url, options);
 
-        Log.info("CS221View::formTeam() - responded");
+        Log.info("CustomStudentView::formTeam() - responded");
 
         const body = await response.json() as Payload;
 
-        Log.info("CS221View::formTeam() - response: " + JSON.stringify(body));
+        Log.info("CustomStudentView::formTeam() - response: " + JSON.stringify(body));
 
         if (typeof body.success !== 'undefined') {
             // worked
@@ -157,7 +154,7 @@ export class CS221View extends StudentView {
             UI.showError(body);
             return null;
         } else {
-            Log.error("CS221View::formTeam() - else ERROR: " + JSON.stringify(body));
+            Log.error("CustomStudentView::formTeam() - else ERROR: " + JSON.stringify(body));
         }
     }
 
